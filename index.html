@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rekap Servis HP</title>
+<style>
+body{font-family:Arial,sans-serif;background:#eef2f5;margin:0;color:#172b3a}
+header{background:#123b5d;color:white;padding:20px;text-align:center}
+main{padding:15px;max-width:600px;margin:auto}
+.card{background:white;padding:15px;margin-bottom:15px;border-radius:12px}
+input,textarea,select,button{box-sizing:border-box;width:100%;padding:12px;margin:6px 0;border-radius:7px;border:1px solid #ccc;font-size:15px}
+button{background:#123b5d;color:white;border:0;font-weight:bold}
+.item{border:1px solid #ddd;padding:12px;margin-top:10px;border-radius:8px}
+img{max-width:100px;margin:5px}
+</style>
+</head>
+<body>
+<header>
+<h2>🔧 Rekap Servis HP</h2>
+<p>Catatan Servis & Riwayat Perbaikan</p>
+</header>
+<main>
+<div class="card">
+<h3>📝 Tambah Servis</h3>
+<form id="form">
+<label>Tanggal</label>
+<input type="date" id="tanggal" required>
+<label>Model HP</label>
+<input id="model" placeholder="Contoh: Redmi Note 10" required>
+<label>Keluhan</label>
+<textarea id="keluhan" placeholder="Keluhan pelanggan" required></textarea>
+<label>Arus PSU</label>
+<input id="arus" placeholder="Contoh: 0.095 A">
+<label>Pengecekan</label>
+<textarea id="cek" placeholder="Hasil pengecekan"></textarea>
+<label>Tindakan</label>
+<textarea id="tindakan" placeholder="Tindakan perbaikan"></textarea>
+<label>Hasil Akhir</label>
+<textarea id="hasil" placeholder="Hasil setelah servis"></textarea>
+<label>Status</label>
+<select id="status">
+<option>Proses</option>
+<option>Selesai</option>
+<option>Menunggu konfirmasi</option>
+</select>
+<label>Biaya Servis (Rp)</label>
+<input type="number" id="biaya" placeholder="150000">
+<label>Foto Kerusakan</label>
+<input type="file" id="foto" accept="image/*" multiple>
+<button type="submit">SIMPAN SERVIS</button>
+</form>
+</div>
+
+<div class="card">
+<h3>📚 Riwayat Servis</h3>
+<input id="cari" placeholder="Cari model atau keluhan">
+<div id="daftar"></div>
+<button onclick="cadangkan()">CADANGKAN DATA</button>
+</div>
+</main>
+
+<script>
+let data=[];
+try{data=JSON.parse(localStorage.getItem("servisHP")||"[]")}catch(e){data=[]}
+document.getElementById("tanggal").value=new Date().toISOString().slice(0,10);
+
+function simpanData(){
+localStorage.setItem("servisHP",JSON.stringify(data));
+tampil();
+}
+
+document.getElementById("form").onsubmit=async function(e){
+e.preventDefault();
+let foto=[];
+for(let f of [...document.getElementById("foto").files].slice(0,3)){
+foto.push(await new Promise(resolve=>{
+let r=new FileReader();
+r.onload=()=>resolve(r.result);
+r.readAsDataURL(f);
+}));
+}
+data.unshift({
+tanggal:tanggal.value,
+model:model.value,
+keluhan:keluhan.value,
+arus:arus.value,
+cek:cek.value,
+tindakan:tindakan.value,
+hasil:hasil.value,
+status:status.value,
+biaya:biaya.value,
+foto
+});
+try{
+simpanData();
+this.reset();
+tanggal.value=new Date().toISOString().slice(0,10);
+alert("Catatan servis tersimpan!");
+}catch(err){
+alert("Penyimpanan penuh. Coba gunakan foto lebih sedikit.");
+}
+};
+
+function tampil(){
+let q=document.getElementById("cari").value.toLowerCase();
+document.getElementById("daftar").innerHTML=data
+.filter(x=>(x.model+" "+x.keluhan).toLowerCase().includes(q))
+.map((x,i)=>`
+<div class="item">
+<b>${aman(x.model)}</b><br>
+${aman(x.tanggal)}<br>
+Keluhan: ${aman(x.keluhan)}<br>
+Arus PSU: ${aman(x.arus)}<br>
+Pengecekan: ${aman(x.cek)}<br>
+Tindakan: ${aman(x.tindakan)}<br>
+Hasil: ${aman(x.hasil)}<br>
+Status: ${aman(x.status)}<br>
+Biaya: Rp${aman(x.biaya)}<br>
+${(x.foto||[]).map(p=>'<img src="'+p+'">').join("")}
+<button onclick="hapus(${i})">HAPUS</button>
+</div>`).join("")||"Belum ada catatan servis.";
+}
+function aman(s){
+return String(s||"-").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function hapus(i){
+if(confirm("Hapus catatan ini?")){
+data.splice(i,1);simpanData();
+}
+}
+document.getElementById("cari").oninput=tampil;
+
+function cadangkan(){
+let b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(b);
+a.download="cadangan-servis.json";
+a.click();
+}
+tampil();
+</script>
+</body>
+</html>
