@@ -1,0 +1,24 @@
+{
+  "id": "/Rekap-service-hape-/",
+  "name": "Rekap Service Hape",
+  "short_name": "Rekap Servis",
+  "description": "Aplikasi pencatatan dan rekap servis handphone",
+  "start_url": "/Rekap-service-hape-/",
+  "scope": "/Rekap-service-hape-/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1565c0",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/Rekap-service-hape-/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Rekap-service-hape-/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
