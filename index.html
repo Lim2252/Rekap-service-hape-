@@ -142,5 +142,12 @@ a.click();
 }
 tampil();
 </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/Rekap-service-hape-/service-worker.js');
+  });
+}
+</script>
 </body>
 </html>
